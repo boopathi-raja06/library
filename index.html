@@ -3,11 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js"></script>
+    <title>Book Library</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .book-card { border: 1px solid #ddd; padding: 10px; margin: 10px; display: inline-block; }
+        .book-card button { margin-top: 5px; display: block; }
+    </style>
 </head>
 <body>
+    <h1>My Library</h1>
+    <button onclick="openForm()">New Book</button>
+    <div id="book-container"></div>
     
+    <dialog id="book-dialog">
+        <form id="book-form">
+            <label>Title: <input type="text" id="title" required></label><br>
+            <label>Author: <input type="text" id="author" required></label><br>
+            <label>Pages: <input type="number" id="pages" required></label><br>
+            <label>Read: <input type="checkbox" id="read"></label><br>
+            <button type="submit">Add Book</button>
+            <button type="button" onclick="closeForm()">Cancel</button>
+        </form>
+    </dialog>
+
+    <script>
+        const myLibrary = [];
+
+        function Book(title, author, pages, read) {
+            this.id = crypto.randomUUID();
+            this.title = title;
+            this.author = author;
+            this.pages = pages;
+            this.read = read;
+        }
+
+        function addBookToLibrary(title, author, pages, read) {
+            const newBook = new Book(title, author, pages, read);
+            myLibrary.push(newBook);
+            displayBooks();
+        }
+
+        function displayBooks() {
+            const container = document.getElementById("book-container");
+            container.innerHTML = "";
+            myLibrary.forEach(book => {
+                const card = document.createElement("div");
+                card.classList.add("book-card");
+                card.dataset.id = book.id;
+                card.innerHTML = `
+                    <strong>${book.title}</strong><br>
+                    Author: ${book.author}<br>
+                    Pages: ${book.pages}<br>
+                    Read: ${book.read ? "Yes" : "No"}<br>
+                    <button onclick="removeBook('${book.id}')">Remove</button>
+                    <button onclick="toggleRead('${book.id}')">Toggle Read</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function removeBook(id) {
+            const index = myLibrary.findIndex(book => book.id === id);
+            if (index !== -1) {
+                myLibrary.splice(index, 1);
+                displayBooks();
+            }
+        }
+
+        function toggleRead(id) {
+            const book = myLibrary.find(book => book.id === id);
+            if (book) {
+                book.read = !book.read;
+                displayBooks();
+            }
+        }
+
+        function openForm() {
+            document.getElementById("book-dialog").showModal();
+        }
+
+        function closeForm() {
+            document.getElementById("book-dialog").close();
+        }
+
+        document.getElementById("book-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const title = document.getElementById("title").value;
+            const author = document.getElementById("author").value;
+            const pages = document.getElementById("pages").value;
+            const read = document.getElementById("read").checked;
+            addBookToLibrary(title, author, pages, read);
+            closeForm();
+            this.reset();
+        });
+    </script>
 </body>
 </html>
